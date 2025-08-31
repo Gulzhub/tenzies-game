@@ -44,8 +44,15 @@ export default function Die(props) {
   }
 
   return (
-    <div className="die-face" style={styles} onClick={props.holdDice}>
+    <button
+      className="die-face"
+      style={styles}
+      onClick={props.holdDice}
+      aria-pressed={props.isHeld}
+      aria-label={`Die with value ${props.value}, 
+            ${props.isHeld ? "held" : "not held"}`}
+    >
       {createDiceFace(props.value)}
-    </div>
+    </button>
   );
 }

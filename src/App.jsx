@@ -1,47 +1,37 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { nanoid } from "nanoid";
 import Confetti from "react-confetti";
 import Die from "./Die";
 
 function App() {
-  const [dice, setDice] = useState(allNewDice());
-  const [tenzies, setTenzies] = useState(false);
+  const [dice, setDice] = useState(() => generateNewDice());
+  const buttonRef = useRef(null);
+
+  const tenzies =
+    dice.every((die) => die.isHeld) &&
+    dice.every((die) => die.value === dice[0].value);
 
   useEffect(() => {
-    const allHeld = dice.every((die) => die.isHeld);
-    const firstValue = dice[0].value;
-    const allSameValue = dice.every((die) => die.value === firstValue);
-    if (allHeld && allSameValue) {
-      setTenzies(true);
-    }
-  }, [dice]);
+    tenzies && buttonRef.current.focus();
+  }, [tenzies]);
 
-  function generateNewDie() {
-    return {
+  function generateNewDice() {
+    return new Array(10).fill(0).map(() => ({
       value: Math.ceil(Math.random() * 6),
       isHeld: false,
       id: nanoid(),
-    };
-  }
-
-  function allNewDice() {
-    const newDice = [];
-    for (let i = 0; i < 10; i++) {
-      newDice.push(generateNewDie());
-    }
-    return newDice;
+    }));
   }
 
   function rollDice() {
     if (!tenzies) {
       setDice((oldDice) =>
-        oldDice.map((die) => {
-          return die.isHeld ? die : generateNewDie();
-        })
+        oldDice.map((die) =>
+          die.isHeld ? die : { ...die, value: Math.ceil(Math.random() * 6) }
+        )
       );
     } else {
-      setTenzies(false);
-      setDice(allNewDice());
+      setDice(generateNewDice());
     }
   }
 
@@ -70,7 +60,7 @@ function App() {
         current value between rolls.
       </p>
       <div className="dice-container">{diceElements}</div>
-      <button className="roll-dice" onClick={rollDice}>
+      <button ref={buttonRef} className="roll-dice" onClick={rollDice}>
         {tenzies ? "New Game" : "Roll"}
       </button>
     </main>
